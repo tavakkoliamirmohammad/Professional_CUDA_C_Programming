@@ -1,5 +1,5 @@
 C_APPS=sumArrayOnHost
-CU_APPS=checkDimension
+CU_APPS=checkDimension sumArraysOnGPU-small-case sumArraysOnGPU-timer
 
 all: ${C_APPS} ${CU_APPS}
 
