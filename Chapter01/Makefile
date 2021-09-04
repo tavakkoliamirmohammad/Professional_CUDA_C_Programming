@@ -1,6 +1,8 @@
-FILES=hello
+C_APPS=hello
 
-all: ${FILES}
+all: ${C_APPS}
 
 %:%.cu
 	nvcc $< -o $@.o
+clean:
+	rm -f $(addsuffix .o, ${C_APPS})

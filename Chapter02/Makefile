@@ -9,4 +9,4 @@ all: ${C_APPS} ${CU_APPS}
 %: %.c
 	gcc -std=c99 -o $@.o $<
 clean:
-	rm -f ${CU_APPS} ${C_APPS}
+	rm -f $(addsuffix .o, ${CU_APPS}) $(addsuffix .o, ${C_APPS})
