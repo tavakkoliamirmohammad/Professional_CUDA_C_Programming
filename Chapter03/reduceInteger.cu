@@ -139,151 +139,151 @@ int main(int argc, char **argv) {
     printf("gpu Neighbored  elapsed %f sec gpu_sum: %d <<<grid %d block "
            "%d>>>\n", iElaps, gpu_sum, grid.x, block.x);
 
-    // kernel 2: reduceNeighbored with less divergence
-    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
-    CHECK(cudaDeviceSynchronize());
-    iStart = seconds();
-    reduceNeighboredLess<<<grid, block>>>(d_idata, d_odata, size);
-    CHECK(cudaDeviceSynchronize());
-    iElaps = seconds() - iStart;
-    CHECK(cudaMemcpy(h_odata, d_odata, grid.x * sizeof(int),
-                     cudaMemcpyDeviceToHost));
-    gpu_sum = 0;
-
-    for (int i = 0; i < grid.x; i++) gpu_sum += h_odata[i];
-
-    printf("gpu Neighbored2 elapsed %f sec gpu_sum: %d <<<grid %d block "
-           "%d>>>\n", iElaps, gpu_sum, grid.x, block.x);
-
-    // kernel 3: reduceInterleaved
-    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
-    CHECK(cudaDeviceSynchronize());
-    iStart = seconds();
-    reduceInterleaved<<<grid, block>>>(d_idata, d_odata, size);
-    CHECK(cudaDeviceSynchronize());
-    iElaps = seconds() - iStart;
-    CHECK(cudaMemcpy(h_odata, d_odata, grid.x * sizeof(int),
-                     cudaMemcpyDeviceToHost));
-    gpu_sum = 0;
-
-    for (int i = 0; i < grid.x; i++) gpu_sum += h_odata[i];
-
-    printf("gpu Interleaved elapsed %f sec gpu_sum: %d <<<grid %d block "
-           "%d>>>\n", iElaps, gpu_sum, grid.x, block.x);
-
-    // kernel 4: reduceUnrolling2
-    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
-    CHECK(cudaDeviceSynchronize());
-    iStart = seconds();
-    reduceUnrolling2<<<grid.x / 2, block>>>(d_idata, d_odata, size);
-    CHECK(cudaDeviceSynchronize());
-    iElaps = seconds() - iStart;
-    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 2 * sizeof(int),
-                     cudaMemcpyDeviceToHost));
-    gpu_sum = 0;
-
-    for (int i = 0; i < grid.x / 2; i++) gpu_sum += h_odata[i];
-
-    printf("gpu Unrolling2  elapsed %f sec gpu_sum: %d <<<grid %d block "
-           "%d>>>\n", iElaps, gpu_sum, grid.x / 2, block.x);
-
-    // kernel 5: reduceUnrolling4
-    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
-    CHECK(cudaDeviceSynchronize());
-    iStart = seconds();
-    reduceUnrolling4<<<grid.x / 4, block>>>(d_idata, d_odata, size);
-    CHECK(cudaDeviceSynchronize());
-    iElaps = seconds() - iStart;
-    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 4 * sizeof(int),
-                     cudaMemcpyDeviceToHost));
-    gpu_sum = 0;
-
-    for (int i = 0; i < grid.x / 4; i++) gpu_sum += h_odata[i];
-
-    printf("gpu Unrolling4  elapsed %f sec gpu_sum: %d <<<grid %d block "
-           "%d>>>\n", iElaps, gpu_sum, grid.x / 4, block.x);
-
-    // kernel 6: reduceUnrolling8
-    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
-    CHECK(cudaDeviceSynchronize());
-    iStart = seconds();
-    reduceUnrolling8<<<grid.x / 8, block>>>(d_idata, d_odata, size);
-    CHECK(cudaDeviceSynchronize());
-    iElaps = seconds() - iStart;
-    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 8 * sizeof(int),
-                     cudaMemcpyDeviceToHost));
-    gpu_sum = 0;
-
-    for (int i = 0; i < grid.x / 8; i++) gpu_sum += h_odata[i];
-
-    printf("gpu Unrolling8  elapsed %f sec gpu_sum: %d <<<grid %d block "
-           "%d>>>\n", iElaps, gpu_sum, grid.x / 8, block.x);
-
-    for (int i = 0; i < grid.x / 16; i++) gpu_sum += h_odata[i];
-
-    // kernel 8: reduceUnrollWarps8
-    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
-    CHECK(cudaDeviceSynchronize());
-    iStart = seconds();
-    reduceUnrollWarps8<<<grid.x / 8, block>>>(d_idata, d_odata, size);
-    CHECK(cudaDeviceSynchronize());
-    iElaps = seconds() - iStart;
-    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 8 * sizeof(int),
-                     cudaMemcpyDeviceToHost));
-    gpu_sum = 0;
-
-    for (int i = 0; i < grid.x / 8; i++) gpu_sum += h_odata[i];
-
-    printf("gpu UnrollWarp8 elapsed %f sec gpu_sum: %d <<<grid %d block "
-           "%d>>>\n", iElaps, gpu_sum, grid.x / 8, block.x);
-
-
-    // kernel 9: reduceCompleteUnrollWarsp8
-    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
-    CHECK(cudaDeviceSynchronize());
-    iStart = seconds();
-    reduceCompleteUnrollWarps8<<<grid.x / 8, block>>>(d_idata, d_odata, size);
-    CHECK(cudaDeviceSynchronize());
-    iElaps = seconds() - iStart;
-    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 8 * sizeof(int),
-                     cudaMemcpyDeviceToHost));
-    gpu_sum = 0;
-
-    for (int i = 0; i < grid.x / 8; i++) gpu_sum += h_odata[i];
-
-    printf("gpu Cmptnroll8  elapsed %f sec gpu_sum: %d <<<grid %d block "
-           "%d>>>\n", iElaps, gpu_sum, grid.x / 8, block.x);
-
-    // kernel 9: reduceCompleteUnroll
-    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
-    CHECK(cudaDeviceSynchronize());
-    iStart = seconds();
-
-    switch (blocksize) {
-        case 1024:
-            reduceCompleteUnroll<1024><<<grid.x / 8, block>>>(d_idata, d_odata,
-                                                              size);
-            break;
-
-        case 512:
-            reduceCompleteUnroll<512><<<grid.x / 8, block>>>(d_idata, d_odata,
-                                                             size);
-            break;
-
-        case 256:
-            reduceCompleteUnroll<256><<<grid.x / 8, block>>>(d_idata, d_odata,
-                                                             size);
-            break;
-
-        case 128:
-            reduceCompleteUnroll<128><<<grid.x / 8, block>>>(d_idata, d_odata,
-                                                             size);
-            break;
-
-        case 64:
-            reduceCompleteUnroll<64><<<grid.x / 8, block>>>(d_idata, d_odata, size);
-            break;
-    }
+//    // kernel 2: reduceNeighbored with less divergence
+//    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+//    CHECK(cudaDeviceSynchronize());
+//    iStart = seconds();
+//    reduceNeighboredLess<<<grid, block>>>(d_idata, d_odata, size);
+//    CHECK(cudaDeviceSynchronize());
+//    iElaps = seconds() - iStart;
+//    CHECK(cudaMemcpy(h_odata, d_odata, grid.x * sizeof(int),
+//                     cudaMemcpyDeviceToHost));
+//    gpu_sum = 0;
+//
+//    for (int i = 0; i < grid.x; i++) gpu_sum += h_odata[i];
+//
+//    printf("gpu Neighbored2 elapsed %f sec gpu_sum: %d <<<grid %d block "
+//           "%d>>>\n", iElaps, gpu_sum, grid.x, block.x);
+//
+//    // kernel 3: reduceInterleaved
+//    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+//    CHECK(cudaDeviceSynchronize());
+//    iStart = seconds();
+//    reduceInterleaved<<<grid, block>>>(d_idata, d_odata, size);
+//    CHECK(cudaDeviceSynchronize());
+//    iElaps = seconds() - iStart;
+//    CHECK(cudaMemcpy(h_odata, d_odata, grid.x * sizeof(int),
+//                     cudaMemcpyDeviceToHost));
+//    gpu_sum = 0;
+//
+//    for (int i = 0; i < grid.x; i++) gpu_sum += h_odata[i];
+//
+//    printf("gpu Interleaved elapsed %f sec gpu_sum: %d <<<grid %d block "
+//           "%d>>>\n", iElaps, gpu_sum, grid.x, block.x);
+//
+//    // kernel 4: reduceUnrolling2
+//    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+//    CHECK(cudaDeviceSynchronize());
+//    iStart = seconds();
+//    reduceUnrolling2<<<grid.x / 2, block>>>(d_idata, d_odata, size);
+//    CHECK(cudaDeviceSynchronize());
+//    iElaps = seconds() - iStart;
+//    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 2 * sizeof(int),
+//                     cudaMemcpyDeviceToHost));
+//    gpu_sum = 0;
+//
+//    for (int i = 0; i < grid.x / 2; i++) gpu_sum += h_odata[i];
+//
+//    printf("gpu Unrolling2  elapsed %f sec gpu_sum: %d <<<grid %d block "
+//           "%d>>>\n", iElaps, gpu_sum, grid.x / 2, block.x);
+//
+//    // kernel 5: reduceUnrolling4
+//    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+//    CHECK(cudaDeviceSynchronize());
+//    iStart = seconds();
+//    reduceUnrolling4<<<grid.x / 4, block>>>(d_idata, d_odata, size);
+//    CHECK(cudaDeviceSynchronize());
+//    iElaps = seconds() - iStart;
+//    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 4 * sizeof(int),
+//                     cudaMemcpyDeviceToHost));
+//    gpu_sum = 0;
+//
+//    for (int i = 0; i < grid.x / 4; i++) gpu_sum += h_odata[i];
+//
+//    printf("gpu Unrolling4  elapsed %f sec gpu_sum: %d <<<grid %d block "
+//           "%d>>>\n", iElaps, gpu_sum, grid.x / 4, block.x);
+//
+//    // kernel 6: reduceUnrolling8
+//    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+//    CHECK(cudaDeviceSynchronize());
+//    iStart = seconds();
+//    reduceUnrolling8<<<grid.x / 8, block>>>(d_idata, d_odata, size);
+//    CHECK(cudaDeviceSynchronize());
+//    iElaps = seconds() - iStart;
+//    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 8 * sizeof(int),
+//                     cudaMemcpyDeviceToHost));
+//    gpu_sum = 0;
+//
+//    for (int i = 0; i < grid.x / 8; i++) gpu_sum += h_odata[i];
+//
+//    printf("gpu Unrolling8  elapsed %f sec gpu_sum: %d <<<grid %d block "
+//           "%d>>>\n", iElaps, gpu_sum, grid.x / 8, block.x);
+//
+//    for (int i = 0; i < grid.x / 16; i++) gpu_sum += h_odata[i];
+//
+//    // kernel 8: reduceUnrollWarps8
+//    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+//    CHECK(cudaDeviceSynchronize());
+//    iStart = seconds();
+//    reduceUnrollWarps8<<<grid.x / 8, block>>>(d_idata, d_odata, size);
+//    CHECK(cudaDeviceSynchronize());
+//    iElaps = seconds() - iStart;
+//    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 8 * sizeof(int),
+//                     cudaMemcpyDeviceToHost));
+//    gpu_sum = 0;
+//
+//    for (int i = 0; i < grid.x / 8; i++) gpu_sum += h_odata[i];
+//
+//    printf("gpu UnrollWarp8 elapsed %f sec gpu_sum: %d <<<grid %d block "
+//           "%d>>>\n", iElaps, gpu_sum, grid.x / 8, block.x);
+//
+//
+//    // kernel 9: reduceCompleteUnrollWarsp8
+//    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+//    CHECK(cudaDeviceSynchronize());
+//    iStart = seconds();
+//    reduceCompleteUnrollWarps8<<<grid.x / 8, block>>>(d_idata, d_odata, size);
+//    CHECK(cudaDeviceSynchronize());
+//    iElaps = seconds() - iStart;
+//    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 8 * sizeof(int),
+//                     cudaMemcpyDeviceToHost));
+//    gpu_sum = 0;
+//
+//    for (int i = 0; i < grid.x / 8; i++) gpu_sum += h_odata[i];
+//
+//    printf("gpu Cmptnroll8  elapsed %f sec gpu_sum: %d <<<grid %d block "
+//           "%d>>>\n", iElaps, gpu_sum, grid.x / 8, block.x);
+//
+//    // kernel 9: reduceCompleteUnroll
+//    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+//    CHECK(cudaDeviceSynchronize());
+//    iStart = seconds();
+//
+//    switch (blocksize) {
+//        case 1024:
+//            reduceCompleteUnroll<1024><<<grid.x / 8, block>>>(d_idata, d_odata,
+//                                                              size);
+//            break;
+//
+//        case 512:
+//            reduceCompleteUnroll<512><<<grid.x / 8, block>>>(d_idata, d_odata,
+//                                                             size);
+//            break;
+//
+//        case 256:
+//            reduceCompleteUnroll<256><<<grid.x / 8, block>>>(d_idata, d_odata,
+//                                                             size);
+//            break;
+//
+//        case 128:
+//            reduceCompleteUnroll<128><<<grid.x / 8, block>>>(d_idata, d_odata,
+//                                                             size);
+//            break;
+//
+//        case 64:
+//            reduceCompleteUnroll<64><<<grid.x / 8, block>>>(d_idata, d_odata, size);
+//            break;
+//    }
 
     CHECK(cudaDeviceSynchronize());
     iElaps = seconds() - iStart;
