@@ -28,7 +28,18 @@ int recursiveReduce(int *data, int const size) {
 
 // Neighbored Pair Implementation with divergence
 __global__ void reduceNeighbored(int *g_idata, int *g_odata, unsigned int n) {
-
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+    int tid = threadIdx.x;
+    if (idx >= n) return;
+    for (int stride = 1; stride < blockDim.x; stride *= 2) {
+        if (tid % (2 * stride) == 0) {
+            g_idata[idx] = g_idata[idx] + g_idata[idx + stride];
+        }
+        __syncthreads();
+    }
+    if (tid == 0) {
+        g_odata[blockIdx.x] = g_idata[idx];
+    }
 }
 
 // Neighbored Pair Implementation with less divergence
