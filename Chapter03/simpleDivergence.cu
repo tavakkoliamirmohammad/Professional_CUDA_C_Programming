@@ -107,13 +107,13 @@ int main(int argc, char **argv) {
     CHECK(cudaMalloc((float **) &d_C, nBytes));
 
     // run a warmup kernel to remove overhead
-    size_t iStart, iElaps;
+    double iStart, iElaps;
     CHECK(cudaDeviceSynchronize());
     iStart = seconds();
     warmingup<<<grid, block>>>(d_C);
     CHECK(cudaDeviceSynchronize());
     iElaps = seconds() - iStart;
-    printf("warmup      <<< %4d %4d >>> elapsed %zu sec \n", grid.x, block.x, iElaps);
+    printf("warmup      <<< %4d %4d >>> elapsed %f sec \n", grid.x, block.x, iElaps);
     CHECK(cudaGetLastError());
 
     // run kernel 1
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
     mathKernel1<<<grid, block>>>(d_C);
     CHECK(cudaDeviceSynchronize());
     iElaps = seconds() - iStart;
-    printf("mathKernel1 <<< %4d %4d >>> elapsed %zu sec \n", grid.x, block.x,
+    printf("mathKernel1 <<< %4d %4d >>> elapsed %f sec \n", grid.x, block.x,
            iElaps);
     CHECK(cudaGetLastError());
 
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
     mathKernel2<<<grid, block>>>(d_C);
     CHECK(cudaDeviceSynchronize());
     iElaps = seconds() - iStart;
-    printf("mathKernel2 <<< %4d %4d >>> elapsed %zu sec \n", grid.x, block.x,
+    printf("mathKernel2 <<< %4d %4d >>> elapsed %f sec \n", grid.x, block.x,
            iElaps);
     CHECK(cudaGetLastError());
 
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
     mathKernel3<<<grid, block>>>(d_C);
     CHECK(cudaDeviceSynchronize());
     iElaps = seconds() - iStart;
-    printf("mathKernel3 <<< %4d %4d >>> elapsed %zu sec \n", grid.x, block.x,
+    printf("mathKernel3 <<< %4d %4d >>> elapsed %f sec \n", grid.x, block.x,
            iElaps);
     CHECK(cudaGetLastError());
 
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
     mathKernel4<<<grid, block>>>(d_C);
     CHECK(cudaDeviceSynchronize());
     iElaps = seconds() - iStart;
-    printf("mathKernel4 <<< %4d %4d >>> elapsed %zu sec \n", grid.x, block.x,
+    printf("mathKernel4 <<< %4d %4d >>> elapsed %f sec \n", grid.x, block.x,
            iElaps);
     CHECK(cudaGetLastError());
 
