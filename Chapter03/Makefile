@@ -1,5 +1,5 @@
 C_APPS=
-CU_APPS=simpleDivergence sumMatrix reduceInteger
+CU_APPS=simpleDivergence sumMatrix reduceInteger reduceIntegerExercise
 NVCC_FLAGS= -O3 -arch=sm_60
 all: ${C_APPS} ${CU_APPS}
 
