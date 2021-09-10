@@ -95,6 +95,21 @@ __global__ void reduceInterleaved(int *g_idata, int *g_odata, unsigned int n) {
 }
 
 __global__ void reduceUnrolling2(int *g_idata, int *g_odata, unsigned int n) {
+    int bidx = 2 * blockDim.x * blockIdx.x;
+    int tid = threadIdx.x;
+    int *i_data = g_idata + bidx;
+    if (bidx + tid + blockDim.x < n)
+        i_data[tid] += i_data[tid + blockDim.x];
+    __syncthreads();
+    for (int stride = blockDim.x / 2; stride >= 1; stride >>= 1) {
+        if (tid < stride) {
+            i_data[tid] += i_data[tid + stride];
+        }
+        __syncthreads();
+    }
+    if (tid == 0) {
+        g_odata[blockIdx.x] = i_data[0];
+    }
 }
 
 __global__ void reduceUnrolling4(int *g_idata, int *g_odata, unsigned int n) {
@@ -240,22 +255,22 @@ int main(int argc, char **argv) {
     printf("gpu Interleaved elapsed %f sec gpu_sum: %d <<<grid %d block "
            "%d>>>\n", iElaps, gpu_sum, grid.x, block.x);
 
-//    // kernel 4: reduceUnrolling2
-//    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
-//    CHECK(cudaDeviceSynchronize());
-//    iStart = seconds();
-//    reduceUnrolling2<<<grid.x / 2, block>>>(d_idata, d_odata, size);
-//    CHECK(cudaDeviceSynchronize());
-//    iElaps = seconds() - iStart;
-//    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 2 * sizeof(int),
-//                     cudaMemcpyDeviceToHost));
-//    gpu_sum = 0;
-//
-//    for (int i = 0; i < grid.x / 2; i++) gpu_sum += h_odata[i];
-//
-//    printf("gpu Unrolling2  elapsed %f sec gpu_sum: %d <<<grid %d block "
-//           "%d>>>\n", iElaps, gpu_sum, grid.x / 2, block.x);
-//
+    // kernel 4: reduceUnrolling2
+    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
+    CHECK(cudaDeviceSynchronize());
+    iStart = seconds();
+    reduceUnrolling2<<<grid.x / 2, block>>>(d_idata, d_odata, size);
+    CHECK(cudaDeviceSynchronize());
+    iElaps = seconds() - iStart;
+    CHECK(cudaMemcpy(h_odata, d_odata, grid.x / 2 * sizeof(int),
+                     cudaMemcpyDeviceToHost));
+    gpu_sum = 0;
+
+    for (int i = 0; i < grid.x / 2; i++) gpu_sum += h_odata[i];
+
+    printf("gpu Unrolling2  elapsed %f sec gpu_sum: %d <<<grid %d block "
+           "%d>>>\n", iElaps, gpu_sum, grid.x / 2, block.x);
+
 //    // kernel 5: reduceUnrolling4
 //    CHECK(cudaMemcpy(d_idata, h_idata, bytes, cudaMemcpyHostToDevice));
 //    CHECK(cudaDeviceSynchronize());
