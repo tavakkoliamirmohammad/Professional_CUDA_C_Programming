@@ -1,6 +1,6 @@
 C_APPS=
 CU_APPS=simpleDivergence sumMatrix reduceInteger reduceFloat reduceIntegerExercise reduceIntegerSync
-NVCC_FLAGS= -O3 -arch=sm_60
+NVCC_FLAGS= -O3 -arch=$(CUDA_ARCH)
 all: ${C_APPS} ${CU_APPS}
 
 %: %.cu
