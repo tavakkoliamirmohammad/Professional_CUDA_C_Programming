@@ -1,6 +1,6 @@
 C_APPS=
 CU_APPS=globalVariable memTransfer pinMemTransfer sumArrayZeroCopy readSegment writeSegment \
-		simpleMathAOS simpleMathSOA readSegmentUnroll
+		simpleMathAOS simpleMathSOA readSegmentUnroll transpose
 NVCC_FLAGS= -O3 -arch=$(CUDA_ARCH) -Wno-deprecated-gpu-targets 
 all: ${C_APPS} ${CU_APPS}
 
