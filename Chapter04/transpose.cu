@@ -79,41 +79,75 @@ __global__ void warmup(float *out, float *in, const int nx, const int ny)
 // case 0 copy kernel: access data in rows
 __global__ void copyRow(float *out, float *in, const int nx, const int ny)
 {
-
+    unsigned int ix = blockDim.x * blockIdx.x + threadIdx.x;
+    unsigned int iy = blockDim.y * blockIdx.y + threadIdx.y;
+    if (ix < nx && iy < ny) {
+        out[iy * nx + ix] = in[iy * nx + ix];
+    }
 }
 
 // case 1 copy kernel: access data in columns
 __global__ void copyCol(float *out, float *in, const int nx, const int ny)
 {
-
+    unsigned int ix = blockDim.x * blockIdx.x + threadIdx.x;
+    unsigned int iy = blockDim.y * blockIdx.y + threadIdx.y;
+    if (ix < nx && iy < ny) {
+        out[ix * ny + iy] = in[ix * ny + iy];
+    }
 }
 
 // case 2 transpose kernel: read in rows and write in columns
 __global__ void transposeNaiveRow(float *out, float *in, const int nx,
                                   const int ny)
 {
-
+    unsigned int ix = blockDim.x * blockIdx.x + threadIdx.x;
+    unsigned int iy = blockDim.y * blockIdx.y + threadIdx.y;
+    if (ix < nx && iy < ny) {
+        out[ix * ny + iy] = in[iy * nx + ix];
+    }
 }
 
 // case 3 transpose kernel: read in columns and write in rows
 __global__ void transposeNaiveCol(float *out, float *in, const int nx,
                                   const int ny)
 {
-
+    unsigned int ix = blockDim.x * blockIdx.x + threadIdx.x;
+    unsigned int iy = blockDim.y * blockIdx.y + threadIdx.y;
+    if (ix < nx && iy < ny) {
+        out[iy * nx + ix] = in[ix * ny + iy];
+    }
 }
 
 // case 4 transpose kernel: read in rows and write in columns + unroll 4 blocks
 __global__ void transposeUnroll4Row(float *out, float *in, const int nx,
                                     const int ny)
 {
-
+    unsigned int ix = 4 * blockDim.x * blockIdx.x + threadIdx.x;
+    unsigned int iy = blockDim.y * blockIdx.y + threadIdx.y;
+    const unsigned int tin = iy * nx + ix;
+    const unsigned int tout = ix * ny + iy;
+    if (ix + 3 * blockDim.x < nx && iy < ny) {
+        out[tout] = in[tin];
+        out[tout + ny * 1 * blockDim.x] = in[tin + 1 * blockDim.x];
+        out[tout + ny * 2 * blockDim.x] = in[tin + 2 * blockDim.x];
+        out[tout + ny * 3 * blockDim.x] = in[tin + 3 * blockDim.x];
+    }
 }
 
 // case 5 transpose kernel: read in columns and write in rows + unroll 4 blocks
 __global__ void transposeUnroll4Col(float *out, float *in, const int nx,
                                     const int ny)
 {
-
+    unsigned int ix = 4 * blockDim.x * blockIdx.x + threadIdx.x;
+    unsigned int iy = blockDim.y * blockIdx.y + threadIdx.y;
+    const unsigned int tin = iy * nx + ix;
+    const unsigned int tout = ix * ny + iy;
+    if (ix + 3 * blockDim.x < nx && iy < ny) {
+        out[tin] = in[tout];
+        out[tin + 1 * blockDim.x] = in[tout + ny * 1 * blockDim.x];
+        out[tin + 2 * blockDim.x] = in[tout + ny * 2 * blockDim.x];
+        out[tin + 3 * blockDim.x] = in[tout + ny * 3 * blockDim.x];
+    }
 }
 
 /*
@@ -123,7 +157,14 @@ __global__ void transposeUnroll4Col(float *out, float *in, const int nx,
 __global__ void transposeDiagonalRow(float *out, float *in, const int nx,
                                      const int ny)
 {
+    unsigned int blk_y = blockIdx.x;
+    unsigned int blk_x = (blockIdx.x + blockIdx.y) % gridDim.x;
 
+    unsigned int ix = blockDim.x * blk_x + threadIdx.x;
+    unsigned int iy = blockDim.y * blk_y + threadIdx.y;
+    if (ix < nx && iy < ny) {
+        out[ix * ny + iy] = in[iy * nx + ix];
+    }
 }
 
 /*
@@ -133,7 +174,14 @@ __global__ void transposeDiagonalRow(float *out, float *in, const int nx,
 __global__ void transposeDiagonalCol(float *out, float *in, const int nx,
                                      const int ny)
 {
-    
+    unsigned int blk_y = blockIdx.x;
+    unsigned int blk_x = (blockIdx.x + blockIdx.y) % gridDim.x;
+
+    unsigned int ix = blockDim.x * blk_x + threadIdx.x;
+    unsigned int iy = blockDim.y * blk_y + threadIdx.y;
+    if (ix < nx && iy < ny) {
+        out[iy * nx + ix] = in[ix * ny + iy];
+    }
 }
 
 // main functions
