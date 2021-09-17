@@ -84,7 +84,7 @@ __global__ void setRowReadColPad(int *out)
 
     unsigned int idx = threadIdx.y * blockDim.x + threadIdx.x;
  
-    tile[threadIdx.x][threadIdx.y] = idx;
+    tile[threadIdx.y][threadIdx.x] = idx;
     __syncthreads();
  
     out[idx] = tile[threadIdx.x][threadIdx.y];
