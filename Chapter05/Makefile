@@ -1,5 +1,6 @@
 C_APPS=
-CU_APPS=checkSquareSharedMem checkRectangleSharedMem reduceInteger
+CU_APPS=checkSquareSharedMem checkRectangleSharedMem reduceInteger \
+		transposeRectangle
 NVCC_FLAGS= -O3 -Wno-deprecated-gpu-targets 
 all: ${C_APPS} ${CU_APPS}
 
