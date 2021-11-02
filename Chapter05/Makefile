@@ -1,6 +1,6 @@
 C_APPS=
-CU_APPS=checkSquareSharedMem checkRectangleSharedMem
-NVCC_FLAGS= -O3 -arch=$(CUDA_ARCH) -Wno-deprecated-gpu-targets 
+CU_APPS=checkSquareSharedMem checkRectangleSharedMem reduceInteger
+NVCC_FLAGS= -O3 -Wno-deprecated-gpu-targets 
 all: ${C_APPS} ${CU_APPS}
 
 %: %.cu
