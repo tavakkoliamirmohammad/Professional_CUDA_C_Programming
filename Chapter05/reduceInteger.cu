@@ -121,10 +121,50 @@ __global__ void reduceSmem(int *g_idata, int *g_odata, unsigned int n)
 
 __global__ void reduceSmemDyn(int *g_idata, int *g_odata, unsigned int n)
 {
-    g_odata[blockIdx.x] = g_idata[0];
-}
+    // set thread ID
+    unsigned int tid = threadIdx.x;
+    int *idata = g_idata + blockIdx.x * blockDim.x;
 
-// un
+    // boundary check
+    unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx >= n) return;
+
+    dsmem[tid] = idata[tid];
+    __syncthreads();
+
+    // in-place reduction in global memory
+    if (blockDim.x >= 1024 && tid < 512) dsmem[tid] += dsmem[tid + 512];
+
+    __syncthreads();
+
+    if (blockDim.x >= 512 && tid < 256) dsmem[tid] += dsmem[tid + 256];
+
+    __syncthreads();
+
+    if (blockDim.x >= 256 && tid < 128) dsmem[tid] += dsmem[tid + 128];
+
+    __syncthreads();
+
+    if (blockDim.x >= 128 && tid < 64) dsmem[tid] += dsmem[tid + 64];
+
+    __syncthreads();
+
+    // unrolling warp
+    if (tid < 32)
+    {
+        volatile int *vsmem = dsmem;
+        vsmem[tid] += vsmem[tid + 32];
+        vsmem[tid] += vsmem[tid + 16];
+        vsmem[tid] += vsmem[tid +  8];
+        vsmem[tid] += vsmem[tid +  4];
+        vsmem[tid] += vsmem[tid +  2];
+        vsmem[tid] += vsmem[tid +  1];
+    }
+
+    // write result for this block to global mem
+    if (tid == 0) g_odata[blockIdx.x] = dsmem[0];
+}
 
 // unroll4 + complete unroll for loop + gmem
 __global__ void reduceGmemUnroll(int *g_idata, int *g_odata, unsigned int n)
@@ -183,12 +223,106 @@ __global__ void reduceGmemUnroll(int *g_idata, int *g_odata, unsigned int n)
 
 __global__ void reduceSmemUnroll(int *g_idata, int *g_odata, unsigned int n)
 {
-    g_odata[blockIdx.x] = g_idata[0];
+    __shared__ int smem[DIM];
+
+    // set thread ID
+    unsigned int tid = threadIdx.x;
+    unsigned int idx = blockIdx.x * blockDim.x * 4 + threadIdx.x;
+    
+    // unrolling 4
+    if (idx + 3 * blockDim.x < n)
+    {
+        int a1 = g_idata[idx];
+        int a2 = g_idata[idx + blockDim.x];
+        int a3 = g_idata[idx + 2 * blockDim.x];
+        int a4 = g_idata[idx + 3 * blockDim.x];
+        smem[tid] = a1 + a2 + a3 + a4;
+    }
+
+    __syncthreads();
+
+    // in-place reduction in global memory
+    if (blockDim.x >= 1024 && tid < 512) smem[tid] += smem[tid + 512];
+
+    __syncthreads();
+
+    if (blockDim.x >= 512 && tid < 256) smem[tid] += smem[tid + 256];
+
+    __syncthreads();
+
+    if (blockDim.x >= 256 && tid < 128) smem[tid] += smem[tid + 128];
+
+    __syncthreads();
+
+    if (blockDim.x >= 128 && tid < 64) smem[tid] += smem[tid + 64];
+
+    __syncthreads();
+
+    // unrolling warp
+    if (tid < 32)
+    {
+        volatile int *vsmem = smem;
+        vsmem[tid] += vsmem[tid + 32];
+        vsmem[tid] += vsmem[tid + 16];
+        vsmem[tid] += vsmem[tid +  8];
+        vsmem[tid] += vsmem[tid +  4];
+        vsmem[tid] += vsmem[tid +  2];
+        vsmem[tid] += vsmem[tid +  1];
+    }
+
+    // write result for this block to global mem
+    if (tid == 0) g_odata[blockIdx.x] = smem[0];
 }
 
 __global__ void reduceSmemUnrollDyn(int *g_idata, int *g_odata, unsigned int n)
 {
-    g_odata[blockIdx.x] = g_idata[0];
+    // set thread ID
+    unsigned int tid = threadIdx.x;
+    unsigned int idx = blockIdx.x * blockDim.x * 4 + threadIdx.x;
+    
+    // unrolling 4
+    if (idx + 3 * blockDim.x < n)
+    {
+        int a1 = g_idata[idx];
+        int a2 = g_idata[idx + blockDim.x];
+        int a3 = g_idata[idx + 2 * blockDim.x];
+        int a4 = g_idata[idx + 3 * blockDim.x];
+        dsmem[tid] = a1 + a2 + a3 + a4;
+    }
+
+    __syncthreads();
+
+    // in-place reduction in global memory
+    if (blockDim.x >= 1024 && tid < 512) dsmem[tid] += dsmem[tid + 512];
+
+    __syncthreads();
+
+    if (blockDim.x >= 512 && tid < 256) dsmem[tid] += dsmem[tid + 256];
+
+    __syncthreads();
+
+    if (blockDim.x >= 256 && tid < 128) dsmem[tid] += dsmem[tid + 128];
+
+    __syncthreads();
+
+    if (blockDim.x >= 128 && tid < 64) dsmem[tid] += dsmem[tid + 64];
+
+    __syncthreads();
+
+    // unrolling warp
+    if (tid < 32)
+    {
+        volatile int *vsmem = dsmem;
+        vsmem[tid] += vsmem[tid + 32];
+        vsmem[tid] += vsmem[tid + 16];
+        vsmem[tid] += vsmem[tid +  8];
+        vsmem[tid] += vsmem[tid +  4];
+        vsmem[tid] += vsmem[tid +  2];
+        vsmem[tid] += vsmem[tid +  1];
+    }
+
+    // write result for this block to global mem
+    if (tid == 0) g_odata[blockIdx.x] = dsmem[0];
 }
 
 __global__ void reduceNeighboredGmem(int *g_idata, int *g_odata,
