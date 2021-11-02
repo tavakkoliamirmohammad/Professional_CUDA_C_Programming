@@ -115,6 +115,44 @@ __global__ void transposeSmemUnroll(float *out, float *in, const int nx,
 __global__ void transposeSmemUnrollPad(float *out, float *in, const int nx,
                                        const int ny)
 {
+    // static shared memory
+    __shared__ float tile[BDIMY][2 * BDIMX + IPAD];
+
+    // coordinate in original matrix
+    unsigned int ix, iy, iy2, ix2, ti, to;
+    ix = 2 * blockDim.x * blockIdx.x + threadIdx.x;
+    iy = blockDim.y * blockIdx.y + threadIdx.y;
+
+    // linear global memory index for original matrix
+    ti = iy * nx + ix;
+
+    // thread index in transposed block
+    unsigned int bidx, irow, icol;
+    bidx = threadIdx.y * blockDim.x + threadIdx.x;
+    irow = bidx / blockDim.y;
+    icol = bidx % blockDim.y;
+
+    // coordinate in transposed matrix
+    ix2 = blockDim.y * blockIdx.y + icol;
+    iy2 = 2 * blockDim.x * blockIdx.x + irow;
+
+    // linear global memory index for transposed matrix
+    to = iy2 * ny + ix2;
+
+    // transpose with boundary test
+    if (ix + blockDim.x < nx && iy < ny)
+    {
+        // load data from global memory to shared memory
+        tile[threadIdx.y][threadIdx.x] = in[ti];
+        tile[threadIdx.y][threadIdx.x + BDIMX] = in[ti + BDIMX];
+
+        // thread synchronization
+        __syncthreads();
+
+        // store data to global memory from shared memory
+        out[to] = tile[icol][irow];
+        out[to + ny * BDIMX] = tile[icol][irow + BDIMX];
+    }
 
 }
 
@@ -167,7 +205,7 @@ __global__ void transposeSmem(float *out, float *in, int nx, int ny)
 __global__ void transposeSmemPad(float *out, float *in, int nx, int ny)
 {
     // static shared memory
-    __shared__ float tile[BDIMY][BDIMX + 2];
+    __shared__ float tile[BDIMY][BDIMX + IPAD];
 
     // coordinate in original matrix
     unsigned int ix, iy, ti, to;
