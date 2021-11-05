@@ -1,5 +1,5 @@
 C_APPS=
-CU_APPS=
+CU_APPS= simpleHyperQDepthFirst simpleHyperQBreadthFirst simpleHyperQOpenMP
 NVCC_FLAGS= -O3 -Wno-deprecated-gpu-targets 
 all: ${C_APPS} ${CU_APPS}
 
