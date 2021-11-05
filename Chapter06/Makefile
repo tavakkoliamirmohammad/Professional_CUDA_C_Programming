@@ -1,6 +1,6 @@
 C_APPS=
 CU_APPS= simpleHyperQDepthFirst simpleHyperQBreadthFirst simpleHyperQOpenMP
-NVCC_FLAGS= -O3 -Wno-deprecated-gpu-targets 
+NVCC_FLAGS= -O3 -Wno-deprecated-gpu-targets  -Xcompiler -fopenmp
 all: ${C_APPS} ${CU_APPS}
 
 %: %.cu
