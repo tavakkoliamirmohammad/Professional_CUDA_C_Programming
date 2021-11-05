@@ -1,6 +1,6 @@
 C_APPS=
 CU_APPS= simpleHyperQDepthFirst simpleHyperQBreadthFirst simpleHyperQOpenMP simpleHyperQDependency \
-	simpleVecAddDepthFirst simpleVecAddBreadthFirst AsyncAPI
+	simpleVecAddDepthFirst simpleVecAddBreadthFirst AsyncAPI simpleCallback
 NVCC_FLAGS= -O3 -Wno-deprecated-gpu-targets  -Xcompiler -fopenmp
 all: ${C_APPS} ${CU_APPS}
 
